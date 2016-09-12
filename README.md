@@ -8,4 +8,4 @@ Get hospital name from and credit to `https://github.com/open-power-workgroup/Ho
 2. In the root folder run `npm install`.
 
 ## Usage
-run `node bootstrap.js`
+run `node bootstrap.js` and will write result to `./data/output.json`
