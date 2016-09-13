@@ -1,5 +1,4 @@
 /* Save data to mongoDB */
-
 import mongoose from 'mongoose';
 import Hospital from './model/hospital/model.js';
 
@@ -9,7 +8,7 @@ import fs from 'fs';
 import cities from './data/cities.json';
 import keywords from './data/input.js';
 
-
+//Connect to MongoDB
 mongoose.connect('mongodb://localhost/FraudHospital');
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'console error'));
@@ -19,6 +18,7 @@ db.once('open', () => {
 
 const baseURL = 'http://gaode.com/service/poiInfo?query_type=TQUERY&pagesize=20&pagenum=1&qii=true&cluster_state=5&need_utd=true&utd_sceneid=1000&div=PC1000&addr_poi_merge=true&is_classify=true';
 
+//Pre process
 const adcodeMap = new Map;
 cities.filter((d) => {
     return d.level === 'city'
@@ -30,6 +30,7 @@ var data, list, d, obj, result = [];
 var spiderIndex = 0, spiderSuccessIndex = 0;
 var queryN = keywords.length;
 
+//Build url
 function getURL(i) {
     let city_hospital = keywords[i].substring(0, 2);
     let adcode = adcodeMap.get(city_hospital);
@@ -70,6 +71,7 @@ function query() {
         spiderIndex++;
         if(spiderIndex == queryN) {
             saveToFile(result);
+            process.exit();
             return ;
         }
         if(!err && res.statusCode == 200) {
@@ -98,7 +100,7 @@ function query() {
             spiderSuccessIndex++;
             console.log(`${spiderSuccessIndex} / ${spiderIndex} | ${queryN}`);
             result.push(obj);
-            saveToFile(result);
+            saveToFile(result); //Dev, In case of cancelling.
             saveToMongoDB(obj);
         }
         else {
@@ -109,4 +111,3 @@ function query() {
 }
 
 query();
-
