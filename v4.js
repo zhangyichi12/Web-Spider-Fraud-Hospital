@@ -36,12 +36,14 @@ function query() {
             body = JSON.parse(body);
             data = body.data;
             if(!data || !data[0]) {
-                query();
+                console.log('No data.');
+                setTimeout(query, 1000);
                 return;
             }
             list = data[0].list;
             if(!list || !list[0]) {
-                query();
+                console.log('Empty list.')
+                setTimeout(query, 1000);
                 return;
             }
             d = list[0];
@@ -60,7 +62,7 @@ function query() {
         else {
             console.log('Error');
         }
-        query();
+        setTimeout(query, 1000);
     });
 }
 

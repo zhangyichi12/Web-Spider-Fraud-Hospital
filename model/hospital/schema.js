@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const HospitalSchema = new Schema({
     city: String,
-    name: Stirng,
+    name: String,
     lat: Number,
     lng: Number,
     tel: String,
