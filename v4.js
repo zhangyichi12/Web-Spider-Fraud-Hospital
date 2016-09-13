@@ -16,15 +16,34 @@ cities.filter((d) => {
 var data, list, d, obj, result = [];
 var spiderIndex = 0, spiderSuccessIndex = 0;
 var queryN = keywords.length;
-function query(url) {
+
+function getURL(i) {
+    let city_hospital = keywords[i].substring(0, 2);
+    let adcode = adcodeMap.get(city_hospital);
+    if(!adcode) return;
+    return encodeURI(`${baseURL}&city=${adcode}&keywords=${keywords[i]}`);
+}
+
+function query() {
+    const url = getURL(spiderIndex);
     request.get(url, (err, res, body) => {
         spiderIndex++;
+        if(spiderIndex == queryN) {
+            save(result);
+            return ;
+        }
         if(!err && res.statusCode == 200) {
             body = JSON.parse(body);
             data = body.data;
-            if(!data || !data[0]) return;
+            if(!data || !data[0]) {
+                query();
+                return;
+            }
             list = data[0].list;
-            if(!list || !list[0]) return ;
+            if(!list || !list[0]) {
+                query();
+                return;
+            }
             d = list[0];
             obj = {
                 city: d.cityname,
@@ -36,11 +55,12 @@ function query(url) {
             spiderSuccessIndex++;
             console.log(`${spiderSuccessIndex} / ${spiderIndex} | ${queryN}`);
             result.push(obj);
-            // save(result);
+            save(result);
         }
         else {
             console.log('Error');
         }
+        query();
     });
 }
 
@@ -50,42 +70,5 @@ function save(obj) {
     });
 }
 
-// Without interval
-/*
-// keywords.forEach((keyword) => {
-//     let city_hospital = keyword.substring(0, 2);
-//     let adcode = adcodeMap.get(city_hospital);
-//     if(!adcode) return;
-//     query(`${baseURL}&city=${adcode}&keywords=${keyword}`);
-// });
-*/
-
-// With Interval
-/*
-var timeInterval = 3000;
-keywords.forEach((keyword, i) => {
-    let city_hospital = keyword.substring(0, 2);
-    let adcode = adcodeMap.get(city_hospital);
-    if(!adcode) return;
-    let timeout = timeInterval * i;
-    setTimeout(() => {
-        query(encodeURI(`${baseURL}&city=${adcode}&keywords=${keyword}`));
-    }, timeout);
-});
-*/
-
-// May cause msg overstock
-const main = setInterval(() => {
-    if(spiderIndex == queryN) {
-        console.log("*");
-        save(result);
-        clearInterval(main);
-        return ;
-    }
-    let city_hospital = keywords[spiderIndex].substring(0, 2);
-    let adcode = adcodeMap.get(city_hospital);
-    if(!adcode) return;
-    console.log(keywords[spiderIndex]);
-    query(encodeURI(`${baseURL}&city=${adcode}&keywords=${keywords[spiderIndex]}`));
-}, 3000);
+query();
 
