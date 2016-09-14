@@ -1,6 +1,7 @@
 /* Save data to mongoDB */
 import mongoose from 'mongoose';
 import Hospital from './model/hospital/model.js';
+import _ from 'lodash';
 
 import request from 'request';
 import fs from 'fs';
@@ -47,19 +48,22 @@ function saveToFile(obj) {
 function saveToMongoDB(obj) {
     Hospital.find({hospital_id: obj.hospital_id}, (err, result) => {
         if(err) {
-            console.log('Error search input');
+            console.log('Error search input', err);
+            return ;
         }
-        else if(result) {
+        else if(_.isEmpty(result)) {    // else if(!result) {
             const newHospital = new Hospital(obj);
             Hospital.create(newHospital, (err) => {
                 if(err) {
-                    console.log('Error creating new hospital');
+                    console.log('Error save new hospital', err);
+                    return ;
                 }
                 console.log('Successfully created new hospital');
             });
         }
         else {
-            console.log('Hospital already exist');
+            console.log('Hospital already exist', err);
+            return ;
         }
     });
 }
